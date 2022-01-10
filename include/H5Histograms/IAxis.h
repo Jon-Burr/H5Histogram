@@ -86,6 +86,7 @@ namespace H5Histograms
     }; //> end class IAxis
 
     using IAxisFactory = H5Composites::GenericFactory<IAxis>;
+    using IAxisUPtr = H5Composites::GenericFactoryUPtr<IAxis>;
 } //> end namespace H5Histograms
 
 #define H5HISTOGRAMS_REGISTER_IAXIS_FACTORY(AXIS) \

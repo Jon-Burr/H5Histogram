@@ -74,7 +74,7 @@ namespace H5Histograms
                 return SIZE_MAX;
             else
                 // Goes into the underflow bin
-                return 0;
+                return static_cast<std::size_t>(0);
         }
         else if (idx > m_nBins)
         {

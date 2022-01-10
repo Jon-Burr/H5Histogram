@@ -90,7 +90,7 @@ namespace H5Histograms
         m_strides[nDims() + 1] = stride;
     }
 
-    std::vector<std::vector<std::vector<std::size_t>>> extendAxes(const value_t &values, std::size_t &offset)
+    std::vector<std::vector<std::vector<std::size_t>>> HistogramBase::extendAxes(const value_t &values, std::size_t &offset)
     {
         std::vector<std::vector<std::vector<std::size_t>>> ret;
         ret.reserve(nDims());
@@ -98,7 +98,7 @@ namespace H5Histograms
         for (std::size_t idx = 0; idx < nDims(); ++idx)
         {
             std::size_t thisOffset = 0;
-            ret.push_back(axis(idx).extendAxis(values.at(idx), thisOffset));
+            ret.push_back(m_axes.at(idx)->extendAxis(values.at(idx), thisOffset));
             offset += thisOffset * m_strides.at(idx);
         }
         return ret;

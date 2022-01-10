@@ -10,10 +10,10 @@ namespace H5Histograms
         static bool init = false;
         if (!init)
         {
-            definition.add<H5Composites::FLVector<IAxisFactor::UPtr>>(&Histogram::m_axes, "axes");
-            definition.add(&Histogram::m_nEntries, "nEntries");
-            definition.add<H5Composites::FLVector<STORAGE>>(&Histogram::m_counts, "counts");
-            definition.add<H5Composites::FLVector<STORAGE>>(&Histogram::m_sumW2, "sumW2");
+            definition.template add<H5Composites::FLVector<IAxisUPtr>>(&Histogram::m_axes, "axes");
+            definition.template add(&Histogram::m_nEntries, "nEntries");
+            definition.template add<H5Composites::FLVector<STORAGE>>(&Histogram::m_counts, "counts");
+            definition.template add<H5Composites::FLVector<STORAGE>>(&Histogram::m_sumW2, "sumW2");
             init = true;
         }
         return definition;
@@ -27,7 +27,7 @@ namespace H5Histograms
     }
 
     template <typename STORAGE>
-    Histogram<STORAGE>::Histogram(const std::vector<std::unique_ptr<IAxis>> &&axes)
+    Histogram<STORAGE>::Histogram(std::vector<std::unique_ptr<IAxis>> &&axes)
         : HistogramBase(std::move(axes)),
           m_nEntries(0),
           m_counts(fullNBins(), 0),
@@ -42,7 +42,7 @@ namespace H5Histograms
     }
 
     template <typename STORAGE>
-    void Histogram<STORAGE>::write(void *buffer) const
+    void Histogram<STORAGE>::writeBuffer(void *buffer) const
     {
         compositeDefinition().writeBuffer(*this, buffer);
     }

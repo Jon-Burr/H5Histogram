@@ -49,7 +49,7 @@ namespace H5Histograms
     IAxis::index_t VariableBinAxis::findBin(const IAxis::value_t &value) const
     {
         auto itr = std::lower_bound(m_edges.begin(), m_edges.end(), std::get<1>(value));
-        return std::distance(m_edges.begin(), itr);
+        return static_cast<std::size_t>(std::distance(m_edges.begin(), itr));
     }
 
     std::vector<std::vector<std::size_t>> VariableBinAxis::extendAxis(const IAxis::value_t &value, std::size_t &offset)
