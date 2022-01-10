@@ -10,6 +10,7 @@
 
 namespace H5Histograms
 {
+
     const H5Composites::CompositeDefinition<CategoryAxis> &CategoryAxis::compositeDefinition()
     {
         static H5Composites::CompositeDefinition<CategoryAxis> definition;

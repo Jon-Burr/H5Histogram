@@ -9,14 +9,21 @@
  * 
  */
 
+#ifndef H5HISTOGRAMS_IAXIS_H
+#define H5HISTOGRAMS_IAXIS_H
+
+#include "H5Cpp.h"
 #include "H5Composites/IBufferWriter.h"
+#include "H5Composites/GenericFactory.h"
+#include "H5Composites/BufferReadTraits.h"
+#include "H5Composites/BufferWriteTraits.h"
 #include <string>
 #include <variant>
 #include <vector>
 
 namespace H5Histograms
 {
-    class IAxis : public H5Composites::IBufferWriter
+    class IAxis : virtual public H5Composites::IBufferWriter, virtual public H5Composites::TypeRegister::RegistreeBase
     {
     public:
         using index_t = std::variant<std::string, std::size_t>;
@@ -29,6 +36,9 @@ namespace H5Histograms
             Category = 0, ///< Category information
             Numeric = 1   ///< Numeric information
         };
+
+        /// The typeID of the axis
+        // virtual H5Composites::TypeRegister::id_t getTypeID() const = 0;
 
         /// The type of this axis
         virtual Type axisType() const = 0;
@@ -74,4 +84,29 @@ namespace H5Histograms
          */
         virtual std::vector<std::vector<std::size_t>> extendAxis(const value_t &value, std::size_t &offset) = 0;
     }; //> end class IAxis
+
+    using IAxisFactory = H5Composites::GenericFactory<IAxis>;
 } //> end namespace H5Histograms
+
+#define H5HISTOGRAMS_REGISTER_IAXIS_FACTORY(AXIS) \
+    const bool AXIS::registeredIAxisFactory = H5Histograms::IAxisFactory::instance().registerFactory<AXIS>()
+
+template <>
+struct H5Composites::H5DType<std::unique_ptr<H5Histograms::IAxis>>
+{
+    static H5::DataType getType(const std::unique_ptr<H5Histograms::IAxis> &value);
+};
+
+template <>
+struct H5Composites::BufferReadTraits<std::unique_ptr<H5Histograms::IAxis>>
+{
+    static std::unique_ptr<H5Histograms::IAxis> read(const void *buffer, const H5::DataType &dtype);
+};
+
+template <>
+struct H5Composites::BufferWriteTraits<std::unique_ptr<H5Histograms::IAxis>>
+{
+    static void write(const std::unique_ptr<H5Histograms::IAxis> &value, void *buffer, const H5::DataType &dtype);
+};
+
+#endif //> !H5HISTOGRAMS_IAXIS_H

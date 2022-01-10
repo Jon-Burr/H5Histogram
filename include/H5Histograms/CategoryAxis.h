@@ -14,12 +14,13 @@
 
 #include "H5Histograms/IAxis.h"
 #include "H5Composites/CompositeDefinition.h"
+#include "H5Composites/TypeRegister.h"
 #include <string>
 #include <vector>
 
 namespace H5Histograms
 {
-    class CategoryAxis : public IAxis
+    class CategoryAxis : public IAxisFactory::Registree<CategoryAxis>, public IAxis
     {
         friend class H5Composites::CompositeDefinition<CategoryAxis>;
         static const H5Composites::CompositeDefinition<CategoryAxis> &compositeDefinition();
@@ -36,6 +37,7 @@ namespace H5Histograms
 
         static index_t overflowName() { return "UNCATEGORISED"; }
 
+        static std::string registeredName() { return "H5Histograms::CategoryAxis"; }
         /// The type of this axis
         Type axisType() const override { return Type::Category; }
 
@@ -84,7 +86,6 @@ namespace H5Histograms
         std::string m_label;
         std::vector<std::string> m_categories;
         bool m_extendable;
-
     }; //> end class CategoryAxis
 }
 
