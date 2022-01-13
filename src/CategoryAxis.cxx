@@ -6,8 +6,6 @@
 
 #include <algorithm>
 
-#include <iostream>
-
 namespace H5Histograms
 {
 
@@ -50,6 +48,32 @@ namespace H5Histograms
         return compositeDefinition().dtype(*this);
     }
 
+    H5Composites::H5Buffer CategoryAxis::mergeBuffers(const std::vector<std::pair<H5::DataType, const void *>> &buffers)
+    {
+        auto itr = buffers.begin();
+        CategoryAxis axis = H5Composites::fromBuffer<CategoryAxis>(itr->second, itr->first);
+        for (++itr; itr != buffers.end(); ++itr)
+            axis.merge(H5Composites::fromBuffer<CategoryAxis>(itr->second, itr->first));
+        return H5Composites::toBuffer(axis);
+    }
+
+    void CategoryAxis::merge(const CategoryAxis &other)
+    {
+        if (m_label != other.m_label)
+            throw std::invalid_argument("Axis labels do not match '" + m_label + "' != '" + other.m_label + "'");
+        if (m_extendable != other.m_extendable)
+            throw std::invalid_argument("Extendable does not match!");
+        if (m_extendable)
+        {
+            // Need to add any categories that are not already present
+            for (const std::string &category : other.m_categories)
+                if (std::find(m_categories.begin(), m_categories.end(), category) == m_categories.end())
+                    m_categories.push_back(category);
+        }
+        else if (m_categories != other.m_categories)
+            throw std::invalid_argument("Categories do not match!");
+    }
+
     std::size_t CategoryAxis::fullNBins() const
     {
         if (m_extendable)
@@ -78,6 +102,13 @@ namespace H5Histograms
         return binOffsetFromValue(std::get<0>(index));
     }
 
+    IAxis::index_t CategoryAxis::indexFromBinOffset(std::size_t offset) const
+    {
+        if (offset >= m_categories.size())
+            return overflowName();
+        return m_categories[offset];
+    }
+
     IAxis::index_t CategoryAxis::findBin(const IAxis::value_t &value) const
     {
         if (containsValue(value))
@@ -91,24 +122,41 @@ namespace H5Histograms
         return std::find(m_categories.begin(), m_categories.end(), std::get<0>(value)) != m_categories.end();
     }
 
-    std::vector<std::vector<std::size_t>> CategoryAxis::extendAxis(
+    IAxis::ExtensionInfo CategoryAxis::extendAxis(
         const IAxis::value_t &variantValue, std::size_t &offset)
     {
+        std::size_t oldNBins = nBins();
         std::string value = std::get<0>(variantValue);
         offset = binOffsetFromValue(value);
-        if (offset != SIZE_MAX)
-            // This means that an appropriate axis exists
-            return {};
-        // Put the new bin at the end of the existing vector
-        std::vector<std::vector<std::size_t>> newBins;
-        newBins.reserve(nBins() + 1);
-        for (std::size_t idx = 0; idx < nBins(); ++idx)
-            newBins.push_back({idx});
-        // Now add a new bin to the end
-        newBins.push_back({});
-        // set the offset to be the new bin
-        offset = m_categories.size();
-        m_categories.push_back(value);
-        return newBins;
+        if (offset == SIZE_MAX)
+        {
+            // No appropriate bin exists
+            // set the offset to be the new bin
+            offset = m_categories.size();
+            m_categories.push_back(value);
+        }
+        // No matter what existing bins get remapped to the same index (the new bin is at the end)
+        return ExtensionInfo::createIdentity(oldNBins);
+    }
+
+    IAxis::ExtensionInfo CategoryAxis::compareAxis(const IAxis &_other) const
+    {
+        const CategoryAxis &other = dynamic_cast<const CategoryAxis &>(_other);
+        if (m_extendable != other.m_extendable)
+            throw std::invalid_argument("Extendable does not match!");
+        if (m_categories == other.m_categories)
+            return ExtensionInfo::createIdentity(other.fullNBins());
+        if (!m_extendable)
+            throw std::invalid_argument("Categories do not match on non-extendable axis!");
+        std::vector<std::size_t> map;
+        map.reserve(other.fullNBins());
+        for (const std::string &category : other.m_categories)
+        {
+            auto itr = std::find(m_categories.begin(), m_categories.end(), category);
+            if (itr == m_categories.end())
+                throw std::out_of_range("Missing category: " + category);
+            map.push_back(std::distance(m_categories.begin(), itr));
+        }
+        return ExtensionInfo::createMapped(map);
     }
 }

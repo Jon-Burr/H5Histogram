@@ -16,10 +16,14 @@
 #include "H5Composites/TypeRegister.h"
 #include "H5Composites/CompositeDefinition.h"
 #include "H5Composites/DTypes.h"
+#include "H5Composites/MergeFactory.h"
 
 namespace H5Histograms
 {
-    class FixedBinAxis : public IAxisFactory::Registree<FixedBinAxis>, public NumericAxis
+    class FixedBinAxis :
+        public IAxisFactory::Registree<FixedBinAxis>,
+        public H5Composites::MergeFactory::Registree<FixedBinAxis>,
+        public NumericAxis
     {
     public:
         /// Describes how the axis can be extended
@@ -43,6 +47,9 @@ namespace H5Histograms
 
         H5::DataType h5DType() const override;
         void writeBuffer(void *buffer) const override;
+        static H5Composites::H5Buffer mergeBuffers(const std::vector<std::pair<H5::DataType, const void *>> &buffers);
+
+        void merge(const FixedBinAxis &other);
 
         static std::string registeredName() { return "H5Histograms::FixedBinAxis"; }
 
@@ -55,6 +62,9 @@ namespace H5Histograms
         /// The number of bins on the axis (including under/overflow)
         std::size_t fullNBins() const override;
 
+        double min() const { return m_min; }
+        double max() const { return m_max; }
+
         /// Get the index of a bin from its value
         IAxis::index_t findBin(const IAxis::value_t &value) const override;
 
@@ -63,17 +73,10 @@ namespace H5Histograms
          * 
          * @param value The value to contain
          * @param[out] offset The offset of the bin containing the specified value
-         * @return A mapping of new bin offsets to the old bin offsets
-         * 
-         * The return value is a vector with one entry per bin in the new array. Each value in this
-         * vector is a list of bin numbers in the old array. If this list is empty, the new bin has
-         * 0 entries, if it has exactly 1 entry then it copies the entries in that bin. Otherwise 
-         * its contents is the sum of the entries in the old bins.
-         * 
-         * If the axis doesn't need to be extended to accommodate the value the returned vector is empty.
-         * This will always be the case if the axis is not extendable.
          */
-        std::vector<std::vector<std::size_t>> extendAxis(const IAxis::value_t &value, std::size_t &offset) override;
+        ExtensionInfo extendAxis(const IAxis::value_t &value, std::size_t &offset) override;
+
+        ExtensionInfo compareAxis(const IAxis &other) const override;
 
         /// Get the width of a single bin
         double binWidth() const;

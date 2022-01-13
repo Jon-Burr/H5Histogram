@@ -36,6 +36,19 @@ namespace H5Histograms
         return compositeDefinition().writeBuffer(*this, buffer);
     }
 
+    H5Composites::H5Buffer VariableBinAxis::mergeBuffers(const std::vector<std::pair<H5::DataType, const void *>> &buffers)
+    {
+        auto itr = buffers.begin();
+        VariableBinAxis axis = H5Composites::fromBuffer<VariableBinAxis>(itr->second, itr->first);
+        for (++itr; itr != buffers.end(); ++itr)
+        {
+            VariableBinAxis other = H5Composites::fromBuffer<VariableBinAxis>(itr->second, itr->first);
+            if (axis.m_label != other.m_label || axis.m_edges != other.m_edges)
+                throw std::invalid_argument("VariableBinAxes do not match!");
+        }
+        return H5Composites::toBuffer(axis);
+    }
+
     std::size_t VariableBinAxis::nBins() const
     {
         return m_edges.size() - 1;
@@ -52,9 +65,17 @@ namespace H5Histograms
         return static_cast<std::size_t>(std::distance(m_edges.begin(), itr));
     }
 
-    std::vector<std::vector<std::size_t>> VariableBinAxis::extendAxis(const IAxis::value_t &value, std::size_t &offset)
+    IAxis::ExtensionInfo VariableBinAxis::extendAxis(const IAxis::value_t &value, std::size_t &offset)
     {
         offset = std::get<1>(findBin(value));
-        return {};
+        return ExtensionInfo::createIdentity(nBins());
+    }
+
+    IAxis::ExtensionInfo VariableBinAxis::compareAxis(const IAxis &_other) const
+    {
+        const VariableBinAxis &other = dynamic_cast<const VariableBinAxis &>(_other);
+        if (m_edges != other.m_edges)
+            throw std::invalid_argument("VariableBinAxes edges do not match!");
+        return ExtensionInfo::createIdentity(fullNBins());
     }
 } //> end namespace H5Histograms

@@ -6,6 +6,7 @@ find_package(HDF5 COMPONENTS CXX REQUIRED)
 add_library(H5Histograms SHARED)
 target_sources(H5Histograms
 PRIVATE
+    src/ArrayIndexer.cxx
     src/CategoryAxis.cxx
     src/FixedBinAxis.cxx
     src/Histogram.cxx

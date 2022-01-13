@@ -20,6 +20,8 @@
 #include <string>
 #include <variant>
 #include <vector>
+#include <map>
+#include <functional>
 
 namespace H5Histograms
 {
@@ -36,9 +38,18 @@ namespace H5Histograms
             Category = 0, ///< Category information
             Numeric = 1   ///< Numeric information
         };
+        /**
+         * @brief Hold information about axis extensions
+         */
+        struct ExtensionInfo
+        {
+            std::function<std::size_t(std::size_t)> func;
+            std::size_t oldNBins;
 
-        /// The typeID of the axis
-        // virtual H5Composites::TypeRegister::id_t getTypeID() const = 0;
+            static ExtensionInfo createIdentity(std::size_t oldNBins);
+            static ExtensionInfo createShift(std::size_t oldNBins, std::size_t shift=0);
+            static ExtensionInfo createMapped(const std::vector<std::size_t> &map);
+        };
 
         /// The type of this axis
         virtual Type axisType() const = 0;
@@ -61,6 +72,9 @@ namespace H5Histograms
         /// Get the offset of a bin from its index
         virtual std::size_t binOffsetFromIndex(const index_t &index) const = 0;
 
+        /// Get the index from a bin offset
+        virtual index_t indexFromBinOffset(std::size_t index) const = 0;
+
         /// Get the index of a bin from its value
         virtual index_t findBin(const value_t &value) const = 0;
 
@@ -72,17 +86,10 @@ namespace H5Histograms
          * 
          * @param value The value to contain
          * @param[out] offset The offset of the bin containing the specified value
-         * @return A mapping of new bin offsets to the old bin offsets
-         * 
-         * The return value is a vector with one entry per bin in the new array. Each value in this
-         * vector is a list of bin numbers in the old array. If this list is empty, the new bin has
-         * 0 entries, if it has exactly 1 entry then it copies the entries in that bin. Otherwise 
-         * its contents is the sum of the entries in the old bins.
-         * 
-         * If the axis doesn't need to be extended to accommodate the value the returned vector is empty.
-         * This will always be the case if the axis is not extendable.
          */
-        virtual std::vector<std::vector<std::size_t>> extendAxis(const value_t &value, std::size_t &offset) = 0;
+        virtual ExtensionInfo extendAxis(const value_t &value, std::size_t &offset) = 0;
+
+        virtual ExtensionInfo compareAxis(const IAxis &other) const = 0;
     }; //> end class IAxis
 
     using IAxisFactory = H5Composites::GenericFactory<IAxis>;

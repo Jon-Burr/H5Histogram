@@ -35,3 +35,27 @@ namespace H5Composites
             compDType.getMemberDataType(compDType.getMemberIndex("data")));
     }
 }
+
+namespace H5Histograms
+{
+    IAxis::ExtensionInfo IAxis::ExtensionInfo::createIdentity(std::size_t oldNBins)
+    {
+        return ExtensionInfo{[] (std::size_t idx) { return idx; }, oldNBins};
+    }
+
+    IAxis::ExtensionInfo IAxis::ExtensionInfo::createShift(std::size_t oldNBins, std::size_t shift)
+    {
+        return ExtensionInfo{
+            [shift] (std::size_t idx) { return idx + shift; },
+            oldNBins
+        };
+    }
+
+    IAxis::ExtensionInfo IAxis::ExtensionInfo::createMapped(const std::vector<std::size_t> &map)
+    {
+        return ExtensionInfo {
+            [map] (std::size_t idx) { return map.at(idx); },
+            map.size()
+        };
+    }
+}

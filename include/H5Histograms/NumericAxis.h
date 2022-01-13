@@ -33,6 +33,9 @@ namespace H5Histograms
         /// Get the offset of a bin from its index
         std::size_t binOffsetFromIndex(const IAxis::index_t &index) const override;
 
+        /// Get the index from a bin offset
+        IAxis::index_t indexFromBinOffset(std::size_t index) const override { return index; }
+
         /// Whether the axis contains a bin that holds the given value
         bool containsValue(const IAxis::value_t &value) const override;
 

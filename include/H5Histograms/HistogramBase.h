@@ -13,14 +13,19 @@
 #define H5HISTOGRAMS_HISTOGRAMBASE_H
 
 #include "H5Composites/IBufferWriter.h"
+#include "H5Histograms/ArrayIndexer.h"
 #include "H5Histograms/IAxis.h"
+#include "H5Composites/MergeFactory.h"
 
 #include <vector>
 #include <memory>
 
 namespace H5Histograms
 {
-    class HistogramBase : public H5Composites::TypeRegister::Registree<HistogramBase>, public H5Composites::IBufferWriter
+    class HistogramBase : 
+        virtual public H5Composites::TypeRegister::Registree<HistogramBase>,
+        public H5Composites::MergeFactory::Registree<HistogramBase>,
+        public H5Composites::IBufferWriter
     {
     public:
         using value_t = std::vector<IAxis::value_t>;
@@ -29,11 +34,17 @@ namespace H5Histograms
 
         static std::string registeredName() { return "H5Histograms::Histogram"; }
 
+        static H5Composites::H5Buffer mergeBuffers(const std::vector<std::pair<H5::DataType, const void*>> &buffers);
+
         std::size_t nDims() const;
 
         const IAxis &axis(std::size_t idx) const;
 
         std::vector<IAxis::index_t> findBin(const value_t &values) const;
+
+        std::vector<std::size_t> axisOffsetsFromValues(const value_t &values) const;
+
+        std::vector<std::size_t> axisOffsetsFromIndices(const index_t &indices) const;
 
         std::size_t binOffsetFromValues(const value_t &values) const;
 
@@ -48,10 +59,10 @@ namespace H5Histograms
     protected:
         void calculateStrides();
 
-        std::vector<std::vector<std::vector<std::size_t>>> extendAxes(const value_t &values, std::size_t &offset);
+        std::vector<IAxis::ExtensionInfo> extendAxes(const value_t &values, std::size_t &offset);
 
         std::vector<std::unique_ptr<IAxis>> m_axes;
-        std::vector<std::size_t> m_strides;
+        ArrayIndexer m_indexer;
     }; //> end class HistogramBase
 } //> end namespace H5Histograms
 

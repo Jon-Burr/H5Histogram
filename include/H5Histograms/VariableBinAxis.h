@@ -15,10 +15,14 @@
 #include "H5Histograms/NumericAxis.h"
 #include "H5Composites/TypeRegister.h"
 #include "H5Composites/CompositeDefinition.h"
+#include "H5Composites/MergeFactory.h"
 
 namespace H5Histograms
 {
-    class VariableBinAxis : public IAxisFactory::Registree<VariableBinAxis>, public NumericAxis
+    class VariableBinAxis : 
+        public IAxisFactory::Registree<VariableBinAxis>,
+        public H5Composites::MergeFactory::Registree<VariableBinAxis>,
+        public NumericAxis
     {
     public:
         friend class H5Composites::CompositeDefinition<VariableBinAxis>;
@@ -29,6 +33,7 @@ namespace H5Histograms
 
         H5::DataType h5DType() const override;
         void writeBuffer(void *buffer) const override;
+        static H5Composites::H5Buffer mergeBuffers(const std::vector<std::pair<H5::DataType, const void*>> &buffers);
 
         static std::string registeredName() { return "H5Histograms::VariableBinAxis"; }
 
@@ -49,21 +54,13 @@ namespace H5Histograms
          * 
          * @param value The value to contain
          * @param[out] offset The offset of the bin containing the specified value
-         * @return A mapping of new bin offsets to the old bin offsets
-         * 
-         * The return value is a vector with one entry per bin in the new array. Each value in this
-         * vector is a list of bin numbers in the old array. If this list is empty, the new bin has
-         * 0 entries, if it has exactly 1 entry then it copies the entries in that bin. Otherwise 
-         * its contents is the sum of the entries in the old bins.
-         * 
-         * If the axis doesn't need to be extended to accommodate the value the returned vector is empty.
-         * This will always be the case if the axis is not extendable.
          * 
          * Given that variable bin axes are not (currently) extendable, this always returns an
-         * empty vector
+         * empty object
          */
-        std::vector<std::vector<std::size_t>> extendAxis(const IAxis::value_t &value, std::size_t &offset) override;
+        ExtensionInfo extendAxis(const IAxis::value_t &value, std::size_t &offset) override;
 
+        ExtensionInfo compareAxis(const IAxis &other) const;
     private:
         std::vector<double> m_edges;
     }; //> end class VariableBinAxis

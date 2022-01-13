@@ -15,12 +15,16 @@
 #include "H5Histograms/IAxis.h"
 #include "H5Composites/CompositeDefinition.h"
 #include "H5Composites/TypeRegister.h"
+#include "H5Composites/MergeFactory.h"
 #include <string>
 #include <vector>
 
 namespace H5Histograms
 {
-    class CategoryAxis : public IAxisFactory::Registree<CategoryAxis>, public IAxis
+    class CategoryAxis :
+        public IAxisFactory::Registree<CategoryAxis>,
+        public H5Composites::MergeFactory::Registree<CategoryAxis>,
+        public IAxis
     {
         friend class H5Composites::CompositeDefinition<CategoryAxis>;
         static const H5Composites::CompositeDefinition<CategoryAxis> &compositeDefinition();
@@ -34,6 +38,9 @@ namespace H5Histograms
 
         void writeBuffer(void *buffer) const override;
         H5::DataType h5DType() const override;
+        static H5Composites::H5Buffer mergeBuffers(const std::vector<std::pair<H5::DataType, const void *>> &);
+
+        void merge(const CategoryAxis &other);
 
         static index_t overflowName() { return "UNCATEGORISED"; }
 
@@ -58,6 +65,9 @@ namespace H5Histograms
 
         /// Get the offset of a bin from its index
         std::size_t binOffsetFromIndex(const IAxis::index_t &index) const override;
+        
+        /// Get the index from a bin offset
+        IAxis::index_t indexFromBinOffset(std::size_t index) const override;
 
         /// Get the index of a bin from its value. If it's the overflow bin return 'UNCATEGORISED'
         IAxis::index_t findBin(const IAxis::value_t &value) const override;
@@ -70,17 +80,10 @@ namespace H5Histograms
          * 
          * @param value The value to contain
          * @param[out] offset The offset of the bin containing the specified value
-         * @return A mapping of new bin offsets to the old bin offsets
-         * 
-         * The return value is a vector with one entry per bin in the new array. Each value in this
-         * vector is a list of bin numbers in the old array. If this list is empty, the new bin has
-         * 0 entries, if it has exactly 1 entry then it copies the entries in that bin. Otherwise 
-         * its contents is the sum of the entries in the old bins.
-         * 
-         * If the axis doesn't need to be extended to accommodate the value the returned vector is empty.
-         * This will always be the case if the axis is not extendable.
          */
-        std::vector<std::vector<std::size_t>> extendAxis(const IAxis::value_t &value, std::size_t &offset) override;
+        ExtensionInfo extendAxis(const IAxis::value_t &value, std::size_t &offset) override;
+
+        ExtensionInfo compareAxis(const IAxis &other) const;
 
     private:
         std::string m_label;
