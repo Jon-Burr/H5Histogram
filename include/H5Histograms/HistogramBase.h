@@ -22,19 +22,16 @@
 
 namespace H5Histograms
 {
-    class HistogramBase : 
-        virtual public H5Composites::TypeRegister::Registree<HistogramBase>,
-        public H5Composites::MergeFactory::Registree<HistogramBase>,
-        public H5Composites::IBufferWriter
+    class HistogramBase : public H5Composites::IBufferWriter
     {
     public:
+        H5COMPOSITES_DECLARE_TYPEID()
+        H5COMPOSITES_DECLARE_MERGE()
         using value_t = std::vector<IAxis::value_t>;
         using index_t = std::vector<IAxis::index_t>;
         HistogramBase(std::vector<std::unique_ptr<IAxis>> &&axes);
 
         static std::string registeredName() { return "H5Histograms::Histogram"; }
-
-        static H5Composites::H5Buffer mergeBuffers(const std::vector<std::pair<H5::DataType, const void*>> &buffers);
 
         std::size_t nDims() const;
 

@@ -6,6 +6,8 @@
 
 #include <algorithm>
 
+H5HISTOGRAMS_REGISTER_IAXIS(H5Histograms::CategoryAxis)
+
 namespace H5Histograms
 {
 

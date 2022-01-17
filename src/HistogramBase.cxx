@@ -7,6 +7,9 @@
 
 #include <tuple>
 
+H5COMPOSITES_REGISTER_TYPE_WITH_NAME(H5Histograms::HistogramBase, "H5Histograms::Histogram")
+H5COMPOSITES_REGISTER_MERGE(H5Histograms::HistogramBase)
+
 namespace {
     // Helper struct to break down the data of a histogram
     struct HistogramData

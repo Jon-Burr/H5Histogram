@@ -3,6 +3,8 @@
 #include "H5Composites/VectorTraits.h"
 #include <algorithm>
 
+H5HISTOGRAMS_REGISTER_IAXIS(H5Histograms::VariableBinAxis)
+
 namespace H5Histograms
 {
     const H5Composites::CompositeDefinition<VariableBinAxis> &VariableBinAxis::compositeDefinition()

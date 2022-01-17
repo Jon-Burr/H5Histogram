@@ -20,12 +20,10 @@
 
 namespace H5Histograms
 {
-    class FixedBinAxis :
-        public IAxisFactory::Registree<FixedBinAxis>,
-        public H5Composites::MergeFactory::Registree<FixedBinAxis>,
-        public NumericAxis
+    class FixedBinAxis : public NumericAxis
     {
     public:
+        H5HISTOGRAMS_DECLARE_IAXIS()
         /// Describes how the axis can be extended
         enum class ExtensionType : char
         {
@@ -47,8 +45,7 @@ namespace H5Histograms
 
         H5::DataType h5DType() const override;
         void writeBuffer(void *buffer) const override;
-        static H5Composites::H5Buffer mergeBuffers(const std::vector<std::pair<H5::DataType, const void *>> &buffers);
-
+        
         void merge(const FixedBinAxis &other);
 
         static std::string registeredName() { return "H5Histograms::FixedBinAxis"; }

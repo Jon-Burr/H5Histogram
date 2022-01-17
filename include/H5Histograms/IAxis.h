@@ -17,6 +17,7 @@
 #include "H5Composites/GenericFactory.h"
 #include "H5Composites/BufferReadTraits.h"
 #include "H5Composites/BufferWriteTraits.h"
+#include "H5Composites/MergeFactory.h"
 #include <string>
 #include <variant>
 #include <vector>
@@ -116,5 +117,19 @@ struct H5Composites::BufferWriteTraits<std::unique_ptr<H5Histograms::IAxis>>
 {
     static void write(const std::unique_ptr<H5Histograms::IAxis> &value, void *buffer, const H5::DataType &dtype);
 };
+
+#define H5HISTOGRAMS_DECLARE_IAXIS() \
+    H5COMPOSITES_DECLARE_TYPEID() \
+    H5COMPOSITES_DECLARE_MERGE() \
+    H5COMPOSITES_DECLARE_GENFACT(IAxis)
+
+#define H5HISTOGRAMS_REGISTER_IAXIS_WITH_NAME(TYPE, NAME) \
+    H5COMPOSITES_REGISTER_TYPE_WITH_NAME(TYPE, NAME) \
+    H5COMPOSITES_REGISTER_MERGE(TYPE) \
+    H5COMPOSITES_REGISTER_GENFACT(IAxis, TYPE)
+
+#define H5HISTOGRAMS_REGISTER_IAXIS(TYPE) \
+    H5HISTOGRAMS_REGISTER_IAXIS_WITH_NAME(TYPE, #TYPE)
+
 
 #endif //> !H5HISTOGRAMS_IAXIS_H

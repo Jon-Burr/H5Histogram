@@ -21,10 +21,7 @@
 
 namespace H5Histograms
 {
-    class CategoryAxis :
-        public IAxisFactory::Registree<CategoryAxis>,
-        public H5Composites::MergeFactory::Registree<CategoryAxis>,
-        public IAxis
+    class CategoryAxis : public IAxis
     {
         friend class H5Composites::CompositeDefinition<CategoryAxis>;
         static const H5Composites::CompositeDefinition<CategoryAxis> &compositeDefinition();
@@ -33,18 +30,18 @@ namespace H5Histograms
         using value_t = std::string;
         using index_t = std::string;
 
+        H5HISTOGRAMS_DECLARE_IAXIS()
+
         CategoryAxis(const void *buffer, const H5::DataType &dtype);
         CategoryAxis(const std::string &label, const std::vector<std::string> &categories, bool extendable = false);
 
         void writeBuffer(void *buffer) const override;
         H5::DataType h5DType() const override;
-        static H5Composites::H5Buffer mergeBuffers(const std::vector<std::pair<H5::DataType, const void *>> &);
-
+        
         void merge(const CategoryAxis &other);
 
         static index_t overflowName() { return "UNCATEGORISED"; }
 
-        static std::string registeredName() { return "H5Histograms::CategoryAxis"; }
         /// The type of this axis
         Type axisType() const override { return Type::Category; }
 

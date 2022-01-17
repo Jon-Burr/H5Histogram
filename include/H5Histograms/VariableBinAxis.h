@@ -19,12 +19,10 @@
 
 namespace H5Histograms
 {
-    class VariableBinAxis : 
-        public IAxisFactory::Registree<VariableBinAxis>,
-        public H5Composites::MergeFactory::Registree<VariableBinAxis>,
-        public NumericAxis
+    class VariableBinAxis : public NumericAxis
     {
     public:
+        H5HISTOGRAMS_DECLARE_IAXIS()
         friend class H5Composites::CompositeDefinition<VariableBinAxis>;
         static const H5Composites::CompositeDefinition<VariableBinAxis> &compositeDefinition();
 
@@ -33,8 +31,7 @@ namespace H5Histograms
 
         H5::DataType h5DType() const override;
         void writeBuffer(void *buffer) const override;
-        static H5Composites::H5Buffer mergeBuffers(const std::vector<std::pair<H5::DataType, const void*>> &buffers);
-
+        
         static std::string registeredName() { return "H5Histograms::VariableBinAxis"; }
 
         /// If the axis is extendable

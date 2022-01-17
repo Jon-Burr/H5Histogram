@@ -8,6 +8,8 @@
 
 H5COMPOSITES_DEFINE_ENUM_DTYPE(H5Histograms::FixedBinAxis::ExtensionType, NoExtension, PreserveNBins, PreserveBinWidth)
 
+H5HISTOGRAMS_REGISTER_IAXIS(H5Histograms::FixedBinAxis)
+
 namespace {
 
     long nBins(double binDiff, double binWidth)
