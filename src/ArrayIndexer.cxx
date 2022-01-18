@@ -2,6 +2,7 @@
 
 #include <numeric>
 #include <functional>
+#include <algorithm>
 
 namespace {
 
@@ -55,7 +56,12 @@ namespace {
 namespace H5Histograms
 {
     ArrayIndexer::const_iterator::const_iterator(const std::vector<std::size_t> &axisSizes)
-        : m_pos(axisSizes.size(), 0), m_max(axisSizes) {}
+        : m_pos(axisSizes.size(), 0), m_max(axisSizes)
+    {
+        // If any of these are 0 then the iterator is automatically at the end and should be set as such
+        if (std::find(axisSizes.begin(), axisSizes.end(), 0) != axisSizes.end())
+            m_pos = endPos(axisSizes);
+    }
 
     ArrayIndexer::const_iterator::const_iterator(
         const std::vector<std::size_t> &axisSizes, const std::vector<std::size_t> &pos)
