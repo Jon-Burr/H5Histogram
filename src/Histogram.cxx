@@ -181,6 +181,7 @@ namespace H5Histograms
         }
         m_counts.at(offset) += weight;
         m_sumW2.at(offset) += weight * weight;
+        ++m_nEntries;
     }
 
     template <typename STORAGE>
