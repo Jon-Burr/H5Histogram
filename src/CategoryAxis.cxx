@@ -1,6 +1,6 @@
 #include "H5Histograms/CategoryAxis.h"
 #include "H5Composites/DTypes.h"
-#include "H5Composites/StringTraits.h"
+#include "H5Composites/FixedLengthStringTraits.h"
 #include "H5Composites/FixedLengthVectorTraits.h"
 #include "H5Composites/CompDTypeUtils.h"
 
@@ -18,8 +18,8 @@ namespace H5Histograms
         if (!init)
         {
             init = true;
-            definition.add(&CategoryAxis::m_label, "label");
-            definition.add<H5Composites::FLVector<std::string>>(&CategoryAxis::m_categories, "categories");
+            definition.add<H5Composites::FLString>(&CategoryAxis::m_label, "label");
+            definition.add<H5Composites::FLVector<H5Composites::FLString>>(&CategoryAxis::m_categories, "categories");
             definition.add(&CategoryAxis::m_extendable, "extendable");
         }
         return definition;

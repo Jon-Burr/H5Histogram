@@ -1,7 +1,6 @@
 #include "H5Histograms/FixedBinAxis.h"
 #include "H5Composites/EnumUtils.h"
-#include "H5Composites/StringTraits.h"
-#include "H5Composites/VectorTraits.h"
+#include "H5Composites/FixedLengthStringTraits.h"
 
 #include <stdexcept>
 #include <cmath>
@@ -37,7 +36,7 @@ namespace H5Histograms
         static bool init = false;
         if (!init)
         {
-            definition.add(&FixedBinAxis::m_label, "label");
+            definition.add<H5Composites::FLString>(&FixedBinAxis::m_label, "label");
             definition.add(&FixedBinAxis::m_nBins, "nBins");
             definition.add(&FixedBinAxis::m_min, "min");
             definition.add(&FixedBinAxis::m_max, "max");

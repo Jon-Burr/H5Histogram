@@ -1,6 +1,6 @@
 #include "H5Histograms/VariableBinAxis.h"
-#include "H5Composites/StringTraits.h"
-#include "H5Composites/VectorTraits.h"
+#include "H5Composites/FixedLengthStringTraits.h"
+#include "H5Composites/FixedLengthVectorTraits.h"
 #include <algorithm>
 
 H5HISTOGRAMS_REGISTER_IAXIS(H5Histograms::VariableBinAxis)
@@ -13,8 +13,8 @@ namespace H5Histograms
         static bool init = false;
         if (!init)
         {
-            definition.add(&VariableBinAxis::m_label, "label");
-            definition.add(&VariableBinAxis::m_edges, "edges");
+            definition.add<H5Composites::FLString>(&VariableBinAxis::m_label, "label");
+            definition.add<H5Composites::FLVector<double>>(&VariableBinAxis::m_edges, "edges");
             init = true;
         }
         return definition;
